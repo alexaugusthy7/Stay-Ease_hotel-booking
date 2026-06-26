@@ -1,53 +1,46 @@
 import jwt from "jsonwebtoken";
-
 import User from "../models/User.js";
 
-
-const authMiddleware =
-  async (req, res, next) => {
-
+const authMiddleware = async (req, res, next) => {
   try {
 
-    // Get Authorization Header
-    const authHeader =
-      req.headers.authorization;
+    const authHeader = req.headers.authorization;
 
-    // Check token exists
     if (
       !authHeader ||
       !authHeader.startsWith("Bearer ")
     ) {
-
       return res.status(401).json({
         message: "Unauthorized",
       });
-
     }
 
+    const token = authHeader.split(" ")[1];
 
-    // Extract token
-    const token =
-      authHeader.split(" ")[1];
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET
+    );
 
+    const user = await User.findById(
+      decoded.id
+    ).select("-password");
 
-    // Verify token
-    const decoded =
-      jwt.verify(
-        token,
-        process.env.JWT_SECRET
-      );
+    // NEW
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
 
+    // NEW
+    if (user.isSuspended) {
+      return res.status(403).json({
+        message: "Your account has been suspended by the administrator.",
+      });
+    }
 
-    // Find user
-    const user =
-      await User.findById(
-        decoded.id
-      ).select("-password");
-
-
-    // Attach user to request
     req.user = user;
-
 
     next();
 

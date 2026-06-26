@@ -11,7 +11,9 @@ import bookingRoutes from "./routes/bookingRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import otpRoutes from "./routes/otpRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
-import reviewRoutes from "./routes/reviewRoutes.js";    
+import reviewRoutes from "./routes/reviewRoutes.js";  
+import ownerRoutes from "./routes/ownerRoutes.js"; 
+import userRoutes from "./routes/userRoutes.js"; 
 
 dotenv.config();
 
@@ -39,6 +41,10 @@ app.use("/api/otp",otpRoutes);
 app.use("/api/admin",adminRoutes);
 
 app.use("/api/reviews",reviewRoutes);
+
+app.use("/api/owner-request",ownerRoutes);
+
+app.use("/api/users",userRoutes);
 
 app.get("/", (req, res) => {res.send("API is running...");
   

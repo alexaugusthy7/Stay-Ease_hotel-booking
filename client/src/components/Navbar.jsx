@@ -4,6 +4,10 @@ import { Link, useLocation, } from "react-router-dom";
 
 import { useAuth, } from "../context/AuthContext";
 
+import api from "../services/api";
+
+import toast from "react-hot-toast";
+
 const Navbar = () => {
 
   const {
@@ -97,12 +101,23 @@ const Navbar = () => {
 
         {user?.role === "admin" && (
           <Link
-            to="/admin/add-hotel"
+            to="/admin"
             className="bg-black text-white px-5 py-2 rounded-full hover:bg-gray-800 transition"
           >
             Admin Dashboard
           </Link>
         )}
+
+        {user?.role === "hotelOwner" && (
+          <Link
+            to="/owner/dashboard"
+            className="hover:text-blue-500"
+          >
+            Owner Dashboard
+          </Link>
+        )}
+
+
 
 
         {/* User */}

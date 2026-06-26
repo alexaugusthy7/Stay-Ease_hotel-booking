@@ -6,6 +6,8 @@ import {
   getRoomsByHotel,
   updateRoom,
   deleteRoom,
+  getMyRooms,
+  getRoomById,
 } from "../controllers/roomController.js";
 
 import authMiddleware from "../middleware/authMiddleware.js";
@@ -15,9 +17,26 @@ import upload from "../middleware/uploadMiddleware.js";
 const router = express.Router();
 
 
+// Get All Rooms
 router.get("/", getRooms);
 
-// Get rooms by hotel
+
+// Get Owner Rooms
+router.get(
+  "/my-rooms",
+  authMiddleware,
+  getMyRooms
+);
+
+
+// Get Single Room By ID
+router.get(
+  "/:id",
+  getRoomById
+);
+
+
+// Get Rooms By Hotel
 router.get(
   "/hotel/:hotelId",
   getRoomsByHotel
@@ -33,6 +52,7 @@ router.post(
   addRoom
 );
 
+
 // Update Room
 router.put(
   "/update/:id",
@@ -41,6 +61,7 @@ router.put(
   upload.single("image"),
   updateRoom
 );
+
 
 // Delete Room
 router.delete(

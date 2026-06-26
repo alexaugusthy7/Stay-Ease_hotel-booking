@@ -1,5 +1,5 @@
 import Room from "../models/Room.js";
-
+import Hotel from "../models/Hotel.js";
 
 // Get All Rooms
 export const getRooms = async (req, res) => {
@@ -50,6 +50,82 @@ export const getRoomsByHotel = async (req, res) => {
   }
 };
 
+export const getMyRooms = async (
+  req,
+  res
+) => {
+
+  try {
+
+    const hotels =
+      await Hotel.find({
+        owner: req.user.id,
+      });
+
+    const hotelIds =
+      hotels.map(
+        hotel => hotel._id
+      );
+
+    const rooms =
+      await Room.find({
+        hotel: {
+          $in: hotelIds,
+        },
+      }).populate("hotel");
+
+    res.status(200).json({
+      success: true,
+      rooms,
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+
+  }
+
+};
+
+export const getRoomById = async (
+  req,
+  res
+) => {
+
+  try {
+
+    const room =
+      await Room.findById(
+        req.params.id
+      );
+
+    if (!room) {
+
+      return res.status(404).json({
+        success: false,
+        message: "Room not found",
+      });
+
+    }
+
+    res.status(200).json(room);
+
+  } catch (error) {
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+
+  }
+
+};
+
 
 // Add Room
 export const addRoom = async (req, res) => {
@@ -62,6 +138,31 @@ export const addRoom = async (req, res) => {
       capacity,
       amenities,
     } = req.body;
+
+    const hotelData =
+      await Hotel.findById(hotel);
+
+    if (!hotelData) {
+
+      return res.status(404).json({
+        success: false,
+        message: "Hotel not found",
+      });
+
+    }
+
+    if (
+      hotelData.owner.toString() !==
+      req.user.id
+    ) {
+
+      return res.status(403).json({
+        success: false,
+        message:
+          "You can only add rooms to your own hotels",
+      });
+
+    }
 
     const room = await Room.create({
       hotel,
@@ -98,8 +199,9 @@ export const addRoom = async (req, res) => {
 export const updateRoom = async (req, res) => {
   try {
 
-    const room =
-      await Room.findById(req.params.id);
+    const room = await Room.findById(
+      req.params.id
+    ).populate("hotel");
 
     if (!room) {
 
@@ -107,10 +209,23 @@ export const updateRoom = async (req, res) => {
         success: false,
         message: "Room not found",
       });
+
     }
 
-    room.hotel =
-      req.body.hotel || room.hotel;
+    // Check ownership
+    if (
+      req.user.role !== "admin" &&
+      room.hotel.owner.toString() !==
+      req.user.id
+    ) {
+
+      return res.status(403).json({
+        success: false,
+        message:
+          "You can only update your own rooms",
+      });
+
+    }
 
     room.roomType =
       req.body.roomType ||
@@ -130,7 +245,10 @@ export const updateRoom = async (req, res) => {
         : room.amenities;
 
     if (req.file) {
-      room.image = req.file.path;
+
+      room.image =
+        req.file.path;
+
     }
 
     await room.save();
@@ -148,16 +266,17 @@ export const updateRoom = async (req, res) => {
       success: false,
       message: error.message,
     });
+
   }
 };
-
 
 // Delete Room
 export const deleteRoom = async (req, res) => {
   try {
 
-    const room =
-      await Room.findById(req.params.id);
+    const room = await Room.findById(
+      req.params.id
+    ).populate("hotel");
 
     if (!room) {
 
@@ -165,6 +284,22 @@ export const deleteRoom = async (req, res) => {
         success: false,
         message: "Room not found",
       });
+
+    }
+
+    // Check ownership
+    if (
+      req.user.role !== "admin" &&
+      room.hotel.owner.toString() !==
+      req.user.id
+    ) {
+
+      return res.status(403).json({
+        success: false,
+        message:
+          "You can only delete your own rooms",
+      });
+
     }
 
     await Room.findByIdAndDelete(
@@ -185,5 +320,6 @@ export const deleteRoom = async (req, res) => {
       success: false,
       message: error.message,
     });
+
   }
 };

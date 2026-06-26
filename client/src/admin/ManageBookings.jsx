@@ -1,7 +1,4 @@
-import {
-  useEffect,
-  useState,
-} from "react";
+import { useEffect, useState } from "react";
 
 import api from "../services/api";
 
@@ -19,56 +16,123 @@ const ManageBookings = () => {
   // Fetch All Bookings
   const fetchBookings = async () => {
 
-  try {
+    try {
 
-    setLoading(true);
+      setLoading(true);
 
-    const token =
-      localStorage.getItem("token");
+      const token =
+        localStorage.getItem("token");
 
-    const response =
-      await api.get(
-        "/bookings/all",
-        {
-          headers: {
-            Authorization:
-              `Bearer ${token}`,
-          },
-        }
+      const response =
+        await api.get(
+          "/bookings/owner",
+          {
+            headers: {
+              Authorization:
+                `Bearer ${token}`,
+            },
+          }
+        );
+
+      console.log(
+        response.data
       );
 
-    console.log(
-      response.data
-    );
+      setBookings(
+        response.data || []
+      );
 
-    setBookings(
-      response.data || []
-    );
+    } catch (error) {
 
-  } catch (error) {
+      console.log(error);
 
-    console.log(error);
+      toast.error(
+        "Failed to fetch bookings"
+      );
 
-    toast.error(
-      "Failed to fetch bookings"
-    );
+    } finally {
 
-  } finally {
+      setLoading(false);
+    }
+  };
 
-    setLoading(false);
-  }
-};
+  // Get Owner Bookings
+  const getOwnerBookings =
+    async (req, res) => {
 
+      try {
+
+        const hotels =
+          await Hotel.find({
+            owner: req.user.id,
+          });
+
+        const hotelIds =
+          hotels.map(
+            hotel => hotel._id
+          );
+
+        const rooms =
+          await Room.find({
+            hotel: {
+              $in: hotelIds,
+            },
+          });
+
+        const roomIds =
+          rooms.map(
+            room => room._id
+          );
+
+        const bookings =
+          await Booking.find({
+            room: {
+              $in: roomIds,
+            },
+          })
+            .populate({
+              path: "room",
+              populate: {
+                path: "hotel",
+              },
+            })
+            .populate("user")
+            .sort({
+              createdAt: -1,
+            });
+
+        res.status(200).json(
+          bookings
+        );
+
+      } catch (error) {
+
+        console.log(error);
+
+        res.status(500).json({
+          message: error.message,
+        });
+
+      }
+
+    };
 
   // Cancel Booking
-  const cancelBooking = async (
-    id
-  ) => {
+  const cancelBooking = async (id) => {
 
     try {
 
+      const token =
+        localStorage.getItem("token");
+
       await api.put(
-        `/bookings/cancel/${id}`
+        `/bookings/cancel/${id}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       toast.success(
@@ -91,6 +155,7 @@ const ManageBookings = () => {
       console.log(error);
 
       toast.error(
+        error.response?.data?.message ||
         "Failed to cancel booking"
       );
     }

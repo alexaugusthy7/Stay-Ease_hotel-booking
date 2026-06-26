@@ -42,6 +42,20 @@ const Sidebar = () => {
           Manage Bookings
         </Link>
 
+        <Link
+          to="/admin/owner-requests"
+          className="block px-4 py-2 hover:bg-gray-200 rounded"
+        >
+          Owner Requests
+        </Link>
+
+        <Link
+          to="/admin/users"
+          className="block px-4 py-2 hover:bg-gray-200 rounded"
+        >
+          Users Management
+        </Link>
+
       </div>
 
     </div>

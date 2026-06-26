@@ -64,7 +64,23 @@ const Login = () => {
         response.data.token
       );
 
-      navigate("/");
+      const user = response.data.user;
+
+      if (user.role === "admin") {
+
+        navigate("/admin");
+
+      } else if (
+        user.role === "hotelOwner"
+      ) {
+
+        navigate("/");
+
+      } else {
+
+        navigate("/");
+
+      }
 
     } catch (error) {
 

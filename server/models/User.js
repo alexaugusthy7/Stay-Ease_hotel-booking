@@ -20,8 +20,18 @@ const userSchema = new mongoose.Schema(
 
     role: {
       type: String,
-      enum: ["user", "admin"],
+      enum: ["user", "hotelOwner", "admin"],
       default: "user",
+    },
+
+    isSuspended: {
+      type: Boolean,
+      default: false,
+    },
+
+    isBlocked: {
+      type: Boolean,
+      default: false,
     },
 
     image: {
@@ -32,6 +42,7 @@ const userSchema = new mongoose.Schema(
   {
     timestamps: true,
   }
+
 );
 
 const User = mongoose.model("User", userSchema);

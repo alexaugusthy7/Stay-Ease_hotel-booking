@@ -6,10 +6,12 @@ import { useAuth } from "../../context/AuthContext";
 
 import toast from "react-hot-toast";
 
+import { useParams } from "react-router-dom";
 
 const AddRoom = () => {
 
   const { token } = useAuth();
+  const { hotelId } = useParams();
 
   const [hotels, setHotels] =
     useState([]);

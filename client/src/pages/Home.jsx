@@ -10,6 +10,8 @@ import toast from "react-hot-toast";
 
 import api from "../services/api";
 
+import BecomeOwnerSection from "../components/BecomeOwnerSection";
+
 const Home = () => {
 
   const navigate = useNavigate();
@@ -553,6 +555,8 @@ const Home = () => {
         </div>
 
       </div>
+
+
       {/* REVIEWS SECTION */}
       <div className="mt-24">
 
@@ -875,6 +879,8 @@ const Home = () => {
         </div>
 
       </div>
+
+      <BecomeOwnerSection />
 
     </MainLayout>
   );

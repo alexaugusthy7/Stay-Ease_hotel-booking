@@ -86,8 +86,7 @@ const Dashboard = () => {
               ?.length || 0,
 
           totalRooms:
-            roomsRes.data
-              ?.length || 0,
+            roomsRes.data.rooms?.length || 0,
 
           totalBookings:
             bookings.length,
@@ -238,6 +237,9 @@ const Dashboard = () => {
                 <th className="py-3">
                   Guest
                 </th>
+                <th className="py-3">
+                  Hotel
+                </th>
 
                 <th className="py-3">
                   Room
@@ -258,7 +260,7 @@ const Dashboard = () => {
             <tbody>
 
               {recentBookings.length >
-              0 ? (
+                0 ? (
 
                 recentBookings.map(
                   (booking) => (
@@ -277,9 +279,10 @@ const Dashboard = () => {
                       </td>
 
                       <td className="py-4">
-                        {booking.room
-                          ?.roomType ||
-                          "N/A"}
+                        {booking.room?.hotel?.name || "N/A"}
+                      </td>
+                      <td className="py-4">
+                        {booking.room?.roomType || "N/A"}
                       </td>
 
                       <td className="py-4">
@@ -293,12 +296,11 @@ const Dashboard = () => {
 
                         <span
                           className={`px-3 py-1 rounded-full text-sm font-medium
-                          ${
-                            booking.paymentStatus ===
-                            "Paid"
+                          ${booking.paymentStatus ===
+                              "Paid"
                               ? "bg-green-100 text-green-700"
                               : "bg-yellow-100 text-yellow-700"
-                          }`}
+                            }`}
                         >
                           {
                             booking.paymentStatus

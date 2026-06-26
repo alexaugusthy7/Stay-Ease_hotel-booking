@@ -33,6 +33,7 @@ export const addHotel = async (req, res) => {
 
       rating,
       image,
+      owner: req.user.id,
     });
 
     res.status(201).json({
@@ -122,33 +123,46 @@ export const getHotels = async (req, res) => {
 
 
 // Update Hotel
-export const updateHotel = async (
-  req,
-  res
-) => {
+export const updateHotel = async (req, res) => {
 
   try {
 
-    const hotel =
-      await Hotel.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        {
-          new: true,
-        }
-      );
+    const hotel = await Hotel.findById(
+      req.params.id
+    );
 
     if (!hotel) {
 
       return res.status(404).json({
         message: "Hotel not found",
       });
+
     }
+
+    // Owner/Admin Check
+    if (
+      req.user.role !== "admin" &&
+      hotel.owner.toString() !== req.user.id
+    ) {
+
+      return res.status(403).json({
+        message:
+          "You can only update your own hotels",
+      });
+
+    }
+
+    const updatedHotel =
+      await Hotel.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        { new: true }
+      );
 
     res.status(200).json({
       message:
         "Hotel updated successfully",
-      hotel,
+      hotel: updatedHotel,
     });
 
   } catch (error) {
@@ -158,6 +172,7 @@ export const updateHotel = async (
     res.status(500).json({
       message: error.message,
     });
+
   }
 };
 
@@ -172,7 +187,7 @@ export const deleteHotel = async (
   try {
 
     const hotel =
-      await Hotel.findByIdAndDelete(
+      await Hotel.findById(
         req.params.id
       );
 
@@ -181,7 +196,23 @@ export const deleteHotel = async (
       return res.status(404).json({
         message: "Hotel not found",
       });
+
     }
+
+    // Owner/Admin Check
+    if (
+      req.user.role !== "admin" &&
+      hotel.owner.toString() !== req.user.id
+    ) {
+
+      return res.status(403).json({
+        message:
+          "You can only delete your own hotels",
+      });
+
+    }
+
+    await hotel.deleteOne();
 
     res.status(200).json({
       message:
@@ -195,6 +226,7 @@ export const deleteHotel = async (
     res.status(500).json({
       message: error.message,
     });
+
   }
 };
 
@@ -229,5 +261,28 @@ export const getHotelById = async (
     res.status(500).json({
       message: error.message,
     });
+  }
+};
+
+export const getMyHotels = async (
+  req,
+  res
+) => {
+
+  try {
+
+    const hotels =
+      await Hotel.find({
+        owner: req.user.id,
+      });
+
+    res.status(200).json(hotels);
+
+  } catch (error) {
+
+    res.status(500).json({
+      message: error.message,
+    });
+
   }
 };

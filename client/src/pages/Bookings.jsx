@@ -1,10 +1,10 @@
-import {  useEffect,  useState,} from "react";
+import { useEffect, useState, } from "react";
 
-import MainLayout  from "../layouts/MainLayout";
+import MainLayout from "../layouts/MainLayout";
 
 import api from "../services/api";
 
-import {  useAuth,} from "../context/AuthContext";
+import { useAuth, } from "../context/AuthContext";
 
 import toast from "react-hot-toast";
 
@@ -159,11 +159,16 @@ const Bookings = () => {
               >
 
                 {/* Top */}
+
                 <div className="flex justify-between items-center mb-6">
 
                   <h2 className="text-3xl font-bold">
                     {booking.room?.roomType || "Room"}
                   </h2>
+
+                  <p className="text-3xl font-bold mt-2">
+                    Hotel: {booking.room?.hotel?.name}
+                  </p>
 
                   <span
                     className={`px-4 py-1 rounded-full text-sm font-semibold
@@ -252,18 +257,27 @@ const Bookings = () => {
                 </div>
 
                 {/* Payment Method */}
-                <div className="mb-6">
-
-                  <p className="text-gray-500">
+                <div>
+                  <p className="text-gray-500 text-sm">
                     Payment Method
                   </p>
 
-                  <p className="font-semibold text-lg">
+                  <p className="font-bold text-lg">
                     {booking.paymentMethod === "online"
                       ? "Pay Now"
-                      : "Pay Later"}
+                      : "Pay At Hotel"}
                   </p>
 
+                  <span
+                    className={`text-sm font-medium ${booking.paymentMethod === "online"
+                        ? "text-green-600"
+                        : "text-orange-500"
+                      }`}
+                  >
+                    {booking.paymentMethod === "online"
+                      ? "(Online)"
+                      : "(Offline)"}
+                  </span>
                 </div>
 
                 {/* Special Requests */}

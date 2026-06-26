@@ -160,13 +160,6 @@ const AddHotel = () => {
             Admin Dashboard
           </h1>
 
-          <Link
-            to="/admin/add-room"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-semibold"
-          >
-            Add Room
-          </Link>
-
         </div>
 
 

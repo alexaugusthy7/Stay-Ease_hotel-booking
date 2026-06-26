@@ -6,7 +6,10 @@ const adminMiddleware = async (req, res, next) => {
     const user = await User.findById(req.user.id);
 
     // Check role
-    if (user.role !== "admin") {
+    if (
+      user.role !== "admin" &&
+      user.role !== "hotelOwner"
+    ) {
       return res.status(403).json({
         message: "Access denied. Admin only.",
       });

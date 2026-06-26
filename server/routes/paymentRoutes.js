@@ -17,9 +17,10 @@ router.post(
   createPaymentOrder
 );
 
+// routes/paymentRoutes.js
+
 router.post(
-  "/verify",
-  authMiddleware,
+  "/verify-payment",
   verifyPayment
 );
 

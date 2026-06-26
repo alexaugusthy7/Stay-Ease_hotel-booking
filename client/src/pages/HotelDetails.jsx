@@ -105,6 +105,7 @@ const HotelDetails = () => {
                     <p className="mb-6">
                         {hotel.description}
                     </p>
+                    
 
 
                     {/* Price */}

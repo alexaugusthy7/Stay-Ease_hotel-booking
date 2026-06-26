@@ -1,9 +1,8 @@
 import Booking from "../models/Booking.js";
 import Room from "../models/Room.js";
+import Hotel from "../models/Hotel.js";
 import sendBookingEmail from "../utils/sendBookingEmail.js";
 
-
-// ================= CREATE BOOKING =================
 export const createBooking = async (
   req,
   res
@@ -168,63 +167,82 @@ export const createBooking = async (
 
 
 // ================= CANCEL BOOKING =================
-export const cancelBooking =
-  async (req, res) => {
+export const cancelBooking = async (req, res) => {
 
-    try {
+  try {
 
-      const booking =
-        await Booking.findById(
-          req.params.id
-        );
-
-      if (!booking) {
-
-        return res.status(404).json({
-          message:
-            "Booking not found",
-        });
+    const booking = await Booking.findById(
+      req.params.id
+    ).populate({
+      path: "room",
+      populate: {
+        path: "hotel"
       }
+    });
 
-      // Already Cancelled
+    if (!booking) {
+
+      return res.status(404).json({
+        message: "Booking not found",
+      });
+
+    }
+
+    // Already Cancelled
+    if (
+      booking.status === "cancelled"
+    ) {
+
+      return res.status(400).json({
+        message:
+          "Booking already cancelled",
+      });
+
+    }
+
+    // Admin can cancel anything
+    if (req.user.role !== "admin") {
+
+      // Owner can cancel only bookings of his hotels
       if (
-        booking.status ===
-        "cancelled"
+        booking.room.hotel.owner.toString() !==
+        req.user.id
       ) {
 
-        return res.status(400).json({
+        return res.status(403).json({
           message:
-            "Booking already cancelled",
+            "You can only cancel bookings of your own hotels",
         });
+
       }
 
-      // Update Booking
-      await Booking.findByIdAndUpdate(
-        req.params.id,
-        {
-          status: "cancelled",
-        }
-      );
-
-      res.status(200).json({
-        message:
-          "Booking cancelled successfully",
-      });
-
-    } catch (error) {
-
-      console.log(
-        "Cancel Booking Error:",
-        error
-      );
-
-      res.status(500).json({
-        message: error.message,
-      });
     }
-  };
 
-  // ================= GET MY BOOKINGS =================
+    booking.status = "cancelled";
+
+    await booking.save();
+
+    res.status(200).json({
+      message:
+        "Booking cancelled successfully",
+    });
+
+  } catch (error) {
+
+    console.log(
+      "Cancel Booking Error:",
+      error
+    );
+
+    res.status(500).json({
+      message: error.message,
+    });
+
+  }
+
+};
+
+// ================= GET MY BOOKINGS =================
 export const getMyBookings =
   async (req, res) => {
 
@@ -234,9 +252,12 @@ export const getMyBookings =
         await Booking.find({
           user: req.user._id,
         })
-
-          .populate("room")
-
+          .populate({
+            path: "room",
+            populate: {
+              path: "hotel",
+            },
+          })
           .sort({
             createdAt: -1,
           });
@@ -267,14 +288,20 @@ export const getAllBookings =
 
       const bookings =
         await Booking.find()
-
-          .populate("room")
-
+          .populate({
+            path: "room",
+            populate: {
+              path: "hotel",
+            },
+          })
           .populate("user")
-
           .sort({
             createdAt: -1,
           });
+
+      console.log(
+        JSON.stringify(bookings[0], null, 2)
+      );
 
       res.status(200).json(
         bookings
@@ -292,3 +319,86 @@ export const getAllBookings =
       });
     }
   };
+
+export const getOwnerBookings = async (req, res) => {
+  try {
+
+    // Get hotels owned by the logged-in owner
+    const hotels = await Hotel.find({
+      owner: req.user.id,
+    });
+
+    const hotelIds = hotels.map(hotel => hotel._id);
+
+    // Get rooms belonging to those hotels
+    const rooms = await Room.find({
+      hotel: { $in: hotelIds },
+    });
+
+    const roomIds = rooms.map(room => room._id);
+
+    // Get bookings only for those rooms
+    const bookings = await Booking.find({
+      room: { $in: roomIds },
+    })
+      .populate({
+        path: "room",
+        populate: {
+          path: "hotel",
+        },
+      })
+      .populate("user")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(bookings);
+
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+export const getOwnerStats = async (req, res) => {
+  try {
+
+    const hotels = await Hotel.find({
+      owner: req.user.id,
+    });
+
+    const hotelIds = hotels.map(
+      hotel => hotel._id
+    );
+
+    const rooms = await Room.find({
+      hotel: { $in: hotelIds },
+    });
+
+    const roomIds = rooms.map(
+      room => room._id
+    );
+
+    const bookings = await Booking.find({
+      room: { $in: roomIds },
+    });
+
+    const totalRevenue = bookings.reduce(
+      (total, booking) =>
+        total + (booking.totalPrice || 0),
+      0
+    );
+
+    res.json({
+      totalRevenue,
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      message: error.message,
+    });
+
+  }
+};

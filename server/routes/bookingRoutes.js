@@ -5,6 +5,8 @@ import {
   getMyBookings,
   cancelBooking,
   getAllBookings,
+  getOwnerBookings,
+  getOwnerStats,
 } from "../controllers/bookingController.js";
 
 import authMiddleware from "../middleware/authMiddleware.js";
@@ -40,4 +42,15 @@ router.get(
   getAllBookings
 );
 
+router.get(
+  "/owner",
+  authMiddleware,
+  getOwnerBookings
+);
+
+router.get(
+  "/owner-stats",
+  authMiddleware,
+  getOwnerStats
+);
 export default router;
