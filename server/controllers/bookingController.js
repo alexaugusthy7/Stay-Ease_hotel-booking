@@ -299,10 +299,6 @@ export const getAllBookings =
             createdAt: -1,
           });
 
-      console.log(
-        JSON.stringify(bookings[0], null, 2)
-      );
-
       res.status(200).json(
         bookings
       );
