@@ -29,11 +29,10 @@ const ManageBookings = () => {
 
       const response =
         await api.get(
-          "/bookings/owner",
+          "/bookings/all",
           {
             headers: {
-              Authorization:
-                `Bearer ${token}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );
