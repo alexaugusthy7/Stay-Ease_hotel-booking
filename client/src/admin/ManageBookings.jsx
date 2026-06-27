@@ -4,6 +4,10 @@ import api from "../services/api";
 
 import toast from "react-hot-toast";
 
+import { jsPDF } from "jspdf";
+
+import autoTable from "jspdf-autotable";
+
 const ManageBookings = () => {
 
   const [bookings, setBookings] =
@@ -56,66 +60,7 @@ const ManageBookings = () => {
     }
   };
 
-  // Get Owner Bookings
-  const getOwnerBookings =
-    async (req, res) => {
 
-      try {
-
-        const hotels =
-          await Hotel.find({
-            owner: req.user.id,
-          });
-
-        const hotelIds =
-          hotels.map(
-            hotel => hotel._id
-          );
-
-        const rooms =
-          await Room.find({
-            hotel: {
-              $in: hotelIds,
-            },
-          });
-
-        const roomIds =
-          rooms.map(
-            room => room._id
-          );
-
-        const bookings =
-          await Booking.find({
-            room: {
-              $in: roomIds,
-            },
-          })
-            .populate({
-              path: "room",
-              populate: {
-                path: "hotel",
-              },
-            })
-            .populate("user")
-            .sort({
-              createdAt: -1,
-            });
-
-        res.status(200).json(
-          bookings
-        );
-
-      } catch (error) {
-
-        console.log(error);
-
-        res.status(500).json({
-          message: error.message,
-        });
-
-      }
-
-    };
 
   // Cancel Booking
   const cancelBooking = async (id) => {
@@ -161,6 +106,123 @@ const ManageBookings = () => {
     }
   };
 
+  const downloadReport = () => {
+
+    const doc = new jsPDF();
+
+    doc.setFontSize(20);
+
+    doc.text(
+      "HOTEL OWNER BOOKING REPORT",
+      105,
+      20,
+      {
+        align: "center",
+      }
+    );
+
+    doc.setFontSize(11);
+
+    doc.text(
+      `Generated : ${new Date().toLocaleDateString()}`,
+      14,
+      30
+    );
+
+    const tableRows = bookings.map((booking) => [
+
+      booking.guestName,
+
+      booking.room?.hotel?.name,
+
+      booking.room?.roomType,
+
+      new Date(
+        booking.checkInDate
+      ).toLocaleDateString(),
+
+      new Date(
+        booking.checkOutDate
+      ).toLocaleDateString(),
+
+      booking.paymentStatus,
+
+      `₹${booking.totalPrice}`
+
+    ]);
+
+    autoTable(doc, {
+
+      startY: 40,
+
+      head: [[
+
+        "Guest",
+
+        "Hotel",
+
+        "Room",
+
+        "Check In",
+
+        "Check Out",
+
+        "Payment",
+
+        "Amount"
+
+      ]],
+
+      body: tableRows,
+
+      theme: "grid",
+
+      headStyles: {
+
+        fillColor: [30, 41, 59]
+
+      }
+
+    });
+
+    const totalRevenue = bookings.reduce(
+
+      (total, booking) =>
+
+        total + booking.totalPrice,
+
+      0
+
+    );
+
+    const finalY = doc.lastAutoTable.finalY + 15;
+
+    doc.setFontSize(14);
+
+    doc.text(
+
+      `Total Bookings : ${bookings.length}`,
+
+      14,
+
+      finalY
+
+    );
+
+    doc.text(
+
+      `Total Revenue : ₹${totalRevenue}`,
+
+      14,
+
+      finalY + 10
+
+    );
+
+    doc.save("Owner-Booking-Report.pdf");
+
+  };
+
 
   useEffect(() => {
     fetchBookings();
@@ -189,10 +251,19 @@ const ManageBookings = () => {
           Manage Bookings
         </h1>
 
-        <div className="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-semibold">
-          Total Bookings:
-          {" "}
-          {bookings.length}
+        <div className="flex gap-4">
+
+          <button
+            onClick={downloadReport}
+            className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg font-semibold"
+          >
+            Download Report
+          </button>
+
+          <div className="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-semibold">
+            Total Bookings : {bookings.length}
+          </div>
+
         </div>
 
       </div>

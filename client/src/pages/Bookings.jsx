@@ -8,6 +8,8 @@ import { useAuth, } from "../context/AuthContext";
 
 import toast from "react-hot-toast";
 
+import jsPDF from "jspdf";
+
 const Bookings = () => {
 
   const { token, user } = useAuth();
@@ -92,6 +94,168 @@ const Bookings = () => {
         "Failed to cancel booking"
       );
     }
+  };
+  const downloadReceipt = (booking) => {
+
+    const doc = new jsPDF();
+
+    // Title
+    doc.setFillColor(30, 41, 59);
+    doc.rect(0, 0, 210, 30, "F");
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(22);
+    doc.text("HOTEL BOOKING RECEIPT", 105, 18, {
+      align: "center",
+    });
+
+    doc.setTextColor(0, 0, 0);
+
+    let y = 45;
+
+    doc.setFontSize(12);
+
+    doc.text(`Booking ID : ${booking._id}`, 20, y);
+
+    y += 10;
+
+    doc.text(
+      `Booking Date : ${new Date(
+        booking.createdAt
+      ).toLocaleDateString()}`,
+      20,
+      y
+    );
+
+    y += 20;
+
+    doc.setFontSize(16);
+    doc.text("Guest Details", 20, y);
+
+    y += 10;
+
+    doc.setFontSize(12);
+
+    doc.text(`Name : ${booking.guestName}`, 20, y);
+
+    y += 8;
+
+    doc.text(`Email : ${booking.email}`, 20, y);
+
+    y += 8;
+
+    doc.text(`Phone : ${booking.phone}`, 20, y);
+
+    y += 8;
+
+    doc.text(`Guests : ${booking.guests}`, 20, y);
+
+    y += 18;
+
+    doc.setFontSize(16);
+
+    doc.text("Hotel Details", 20, y);
+
+    y += 10;
+
+    doc.setFontSize(12);
+
+    doc.text(`Hotel : ${booking.room.hotel.name}`, 20, y);
+
+    y += 8;
+
+    doc.text(`Room : ${booking.room.roomType}`, 20, y);
+
+    y += 8;
+
+    doc.text(`City : ${booking.room.hotel.city}`, 20, y);
+
+    y += 18;
+
+    doc.setFontSize(16);
+
+    doc.text("Stay Details", 20, y);
+
+    y += 10;
+
+    doc.setFontSize(12);
+
+    doc.text(
+      `Check In : ${new Date(
+        booking.checkInDate
+      ).toLocaleDateString()}`,
+      20,
+      y
+    );
+
+    y += 8;
+
+    doc.text(
+      `Check Out : ${new Date(
+        booking.checkOutDate
+      ).toLocaleDateString()}`,
+      20,
+      y
+    );
+
+    y += 8;
+
+    doc.text(
+      `Payment : ${booking.paymentMethod}`,
+      20,
+      y
+    );
+
+    y += 8;
+
+    doc.text(
+      `Status : ${booking.paymentStatus}`,
+      20,
+      y
+    );
+
+    y += 20;
+
+    doc.setDrawColor(150);
+
+    doc.line(20, y, 190, y);
+
+    y += 12;
+
+    doc.setFontSize(18);
+
+    doc.text(
+      `TOTAL : ₹${booking.totalPrice}`,
+      20,
+      y
+    );
+
+    y += 30;
+
+    doc.setFontSize(12);
+
+    doc.setTextColor(100);
+
+    doc.text(
+      "Thank you for choosing our Hotel Booking System.",
+      105,
+      y,
+      { align: "center" }
+    );
+
+    y += 8;
+
+    doc.text(
+      "We wish you a pleasant stay!",
+      105,
+      y,
+      { align: "center" }
+    );
+
+    doc.save(
+      `Booking-${booking._id}.pdf`
+    );
+
   };
 
   useEffect(() => {
@@ -270,8 +434,8 @@ const Bookings = () => {
 
                   <span
                     className={`text-sm font-medium ${booking.paymentMethod === "online"
-                        ? "text-green-600"
-                        : "text-orange-500"
+                      ? "text-green-600"
+                      : "text-orange-500"
                       }`}
                   >
                     {booking.paymentMethod === "online"
@@ -313,14 +477,23 @@ const Bookings = () => {
                   </div>
 
                   {/* Cancel Button */}
-                  <button
-                    onClick={() =>
-                      cancelBooking(booking._id)
-                    }
-                    className="mt-4 px-5 py-3 rounded-xl text-white font-semibold transition bg-red-500 hover:bg-red-600"
-                  >
-                    Cancel Booking
-                  </button>
+                  <div className="flex gap-3">
+
+                    <button
+                      onClick={() => downloadReceipt(booking)}
+                      className="px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+                    >
+                      Download Receipt
+                    </button>
+
+                    <button
+                      onClick={() => cancelBooking(booking._id)}
+                      className="px-5 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white font-semibold"
+                    >
+                      Cancel Booking
+                    </button>
+
+                  </div>
 
                 </div>
 
