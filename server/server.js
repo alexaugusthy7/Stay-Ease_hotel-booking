@@ -25,7 +25,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://stay-ease-hotel-booking.vercel.app/",
+      "https://stay-ease-hotel-booking.vercel.app",
     ],
     credentials: true,
   })
