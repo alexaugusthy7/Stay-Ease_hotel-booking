@@ -8,6 +8,8 @@ import api from "../services/api";
 
 import toast from "react-hot-toast";
 
+import { BASE_URL } from "../services/api.js";
+
 
 const HotelDetails = () => {
 
@@ -83,8 +85,7 @@ const HotelDetails = () => {
 
                 {/* Hotel Image */}
                 <img
-                    src={`http://localhost:5000/${hotel.image}`}
-
+                    src={`${BASE_URL}/${hotel.image}`}
                     alt={hotel.name}
 
                     className="w-full h-100 object-cover rounded-lg"
@@ -105,7 +106,7 @@ const HotelDetails = () => {
                     <p className="mb-6">
                         {hotel.description}
                     </p>
-                    
+
 
 
                     {/* Price */}
@@ -157,7 +158,7 @@ const HotelDetails = () => {
 
                                     {/* Room Image */}
                                     <img
-                                        src={`http://localhost:5000/${room.image}`}
+                                        src={`${BASE_URL}/${room.image}`}
                                         alt={room.roomType}
                                         className="w-full h-56 object-cover"
                                     />
