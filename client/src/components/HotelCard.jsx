@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { BASE_URL } from "../services/api.js";
 
 const HotelCard = ({ hotel }) => {
   return (
@@ -6,7 +7,7 @@ const HotelCard = ({ hotel }) => {
 
       {/* Hotel Image */}
       <img
-        src={`http://localhost:5000/${hotel.image}`}
+        src={`${BASE_URL}/${hotel.image}`}
         alt={hotel.name}
         className="w-full h-56 object-cover"
       />
