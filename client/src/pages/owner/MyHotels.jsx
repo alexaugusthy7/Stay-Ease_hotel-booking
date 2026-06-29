@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../../services/api";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { BASE_URL } from "../../services/api.js";
 
 const MyHotels = () => {
 
@@ -118,7 +119,7 @@ const MyHotels = () => {
                   src={
                     hotel.image.startsWith("http")
                       ? hotel.image
-                      : `http://localhost:5000/${hotel.image}`
+                      : `${BASE_URL}/${hotel.image}`
                   }
                   alt={hotel.name}
                   className="w-full h-48 object-cover"
