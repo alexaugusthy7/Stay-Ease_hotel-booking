@@ -24,19 +24,25 @@ export const sendOtp = async (
     });
 
     // Send Email
-    await transporter.sendMail({
-      from: "alex <alexaugustine583@gmail.com>",
+    await transporter.sendTransacEmail({
+      sender: {
+        name: "StayEase",
+        email: "alexaugustine583@gmail.com", // verified sender
+      },
 
-      to: email,
+      to: [
+        {
+          email,
+        },
+      ],
 
-      subject:
-        "StayEase Booking OTP",
+      subject: "StayEase Booking OTP",
 
-      html: `
-        <h2>Your OTP Code</h2>
-        <h1>${otp}</h1>
-        <p>Valid for 5 minutes</p>
-      `,
+      htmlContent: `
+    <h2>Your OTP Code</h2>
+    <h1>${otp}</h1>
+    <p>Valid for 5 minutes</p>
+  `,
     });
 
     res.status(200).json({
