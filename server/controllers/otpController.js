@@ -25,7 +25,7 @@ export const sendOtp = async (
 
     // Send Email
     await transporter.sendMail({
-      from: `"StayEase" <${process.env.BREVO_EMAIL}>`,
+      from: "alex <alexaugustine583@gmail.com>",
 
       to: email,
 
