@@ -1,101 +1,67 @@
-import nodemailer from "nodemailer";
-
 const sendBookingEmail = async (booking) => {
-
   try {
+    console.log("Sending booking email to:", booking.email);
 
-    console.log(
-      "Sending booking email to:",
-      booking.email
-    );
-
-    const transporter =
-      nodemailer.createTransport({
-
-        host: "smtp.gmail.com",
-
-        port: 465,
-
-        secure: true,
-
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
+    const response = await fetch(
+      "https://api.brevo.com/v3/smtp/email",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "api-key": process.env.BREVO_API_KEY,
         },
+        body: JSON.stringify({
+          sender: {
+            name: "StayEase",
+            email: "alexaugustine583@gmail.com", // Your verified sender
+          },
+          to: [
+            {
+              email: booking.email,
+            },
+          ],
+          subject: "Booking Confirmation - StayEase",
+          htmlContent: `
+            <h2>🎉 Booking Confirmed</h2>
 
-      });
+            <p>Hello <strong>${booking.guestName}</strong>,</p>
 
-    await transporter.verify();
+            <p>Your booking has been confirmed successfully.</p>
 
-    console.log(
-      "SMTP Server Connected"
+            <h3>Booking Details</h3>
+
+            <ul>
+              <li><strong>Check-In:</strong> ${new Date(
+                booking.checkInDate
+              ).toLocaleDateString()}</li>
+
+              <li><strong>Check-Out:</strong> ${new Date(
+                booking.checkOutDate
+              ).toLocaleDateString()}</li>
+
+              <li><strong>Guests:</strong> ${booking.guests}</li>
+
+              <li><strong>Total Price:</strong> ₹${booking.totalPrice}</li>
+
+              <li><strong>Payment Method:</strong> ${booking.paymentMethod}</li>
+            </ul>
+
+            <p>Thank you for choosing <strong>StayEase</strong>. We wish you a pleasant stay! 🏨</p>
+          `,
+        }),
+      }
     );
 
-    await transporter.sendMail({
+    const data = await response.json();
 
-      from: `"StayEase" <${process.env.EMAIL_USER}>`,
+    if (!response.ok) {
+      console.error("Brevo Error:", data);
+      throw new Error(data.message || "Failed to send booking email");
+    }
 
-      to: booking.email,
-
-      subject:
-        "Booking Confirmation - StayEase",
-
-      html: `
-        <h2>Booking Confirmed</h2>
-
-        <p>Hello ${booking.guestName},</p>
-
-        <p>Your booking has been confirmed successfully.</p>
-
-        <h3>Booking Details</h3>
-
-        <ul>
-          <li>
-            Check-In:
-            ${new Date(
-              booking.checkInDate
-            ).toLocaleDateString()}
-          </li>
-
-          <li>
-            Check-Out:
-            ${new Date(
-              booking.checkOutDate
-            ).toLocaleDateString()}
-          </li>
-
-          <li>
-            Guests:
-            ${booking.guests}
-          </li>
-
-          <li>
-            Total Price:
-            ₹${booking.totalPrice}
-          </li>
-
-          <li>
-            Payment Method:
-            ${booking.paymentMethod}
-          </li>
-        </ul>
-
-        <p>
-          Thank you for choosing StayEase.
-        </p>
-      `,
-    });
-
-    console.log(
-      "Booking email sent successfully"
-    );
-
+    console.log("Booking confirmation email sent successfully.");
   } catch (error) {
-
-    console.log(
-      "Booking Email Error:",
-      error
-    );
+    console.error("Booking Email Error:", error);
   }
 };
 
