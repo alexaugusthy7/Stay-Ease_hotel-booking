@@ -201,19 +201,26 @@ export const cancelBooking = async (req, res) => {
     }
 
     // Admin can cancel anything
-    if (req.user.role !== "admin") {
+    if (req.user.role === "admin") {
+      // allow
+    }
+    else if (req.user.role === "hotelOwner") {
 
-      // Owner can cancel only bookings of his hotels
       if (
-        booking.room.hotel.owner.toString() !==
-        req.user.id
+        booking.room.hotel.owner.toString() !== req.user.id
       ) {
-
         return res.status(403).json({
-          message:
-            "You can only cancel bookings of your own hotels",
+          message: "Not authorized",
         });
+      }
 
+    }
+    else {
+
+      if (booking.user.toString() !== req.user.id) {
+        return res.status(403).json({
+          message: "Not authorized",
+        });
       }
 
     }
