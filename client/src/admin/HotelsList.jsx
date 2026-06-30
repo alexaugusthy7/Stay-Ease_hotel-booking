@@ -9,6 +9,8 @@ import toast from "react-hot-toast";
 
 import { useAuth } from "../../context/AuthContext";
 
+import { BASE_URL } from "../../services/api";
+
 const HotelsList = () => {
 
   const [hotels, setHotels] =
@@ -157,7 +159,7 @@ const HotelsList = () => {
               <img
                 src={
                   hotel.image
-                    ? `http://localhost:5000/${hotel.image}`
+                    ? `${BASE_URL}/${hotel.image}`
                     : "https://via.placeholder.com/400x250"
                 }
                 alt={hotel.name}

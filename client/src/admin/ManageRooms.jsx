@@ -7,6 +7,8 @@ import api from "../services/api";
 
 import toast from "react-hot-toast";
 
+import { BASE_URL } from "../services/api";
+
 const ManageRooms = () => {
 
   const [rooms, setRooms] =
@@ -374,7 +376,7 @@ const ManageRooms = () => {
                   "http"
                 )
                   ? room.image
-                  : `http://localhost:5000/${room.image}`
+                  : `${BASE_URL}/${room.image}`
               }
               alt={room.roomType}
               className="w-full h-52 object-cover"

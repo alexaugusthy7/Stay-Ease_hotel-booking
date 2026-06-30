@@ -7,6 +7,8 @@ import api from "../services/api";
 
 import toast from "react-hot-toast";
 
+import { BASE_URL } from "../services/api";
+
 const ManageHotels = () => {
 
   const [hotels, setHotels] =
@@ -344,7 +346,7 @@ const ManageHotels = () => {
               src={
                 hotel.image?.startsWith("http")
                   ? hotel.image
-                  : `http://localhost:5000/${hotel.image}`
+                  : `${BASE_URL}/${hotel.image}`
               }
               alt={hotel.name}
               className="w-full h-56 object-cover"
